@@ -10,11 +10,11 @@ let port = 3000;
 // 引入NodeJS的子进程模块
 let child_process = require('child_process');
 
-app.get('/', function(req, res){
+app.get('/*', function(req, res){
 
     // 完整URL
-    // let url = req.protocol + '://'+ req.hostname + req.originalUrl;
-    let url='http://www.kbjbuy.com'
+    let url = req.protocol + '://'+ req.hostname + req.originalUrl;
+    // let url='http://www.kbjbuy.com'
 
     // 预渲染后的页面字符串容器
     let content = '';
