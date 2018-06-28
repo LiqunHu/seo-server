@@ -1,52 +1,46 @@
 // ExpressJS调用方式
+require('chromedriver'); //导入chrome浏览器 driver
 const express = require('express');
 const debug = require('debug')('demo:server');
 const http = require('http');
-
+const {
+  Builder,
+  By,
+  Key,
+  until
+} = require('selenium-webdriver');
+const chrome = require('selenium-webdriver/chrome');
 let app = express();
 let port = 3000;
-
 
 // 引入NodeJS的子进程模块
 let child_process = require('child_process');
 
 app.get('/*', function(req, res){
-
-    // 完整URL
-    let url = req.protocol + '://'+ req.hostname + req.originalUrl;
-    // let url='http://www.kbjbuy.com'
-
-    // 预渲染后的页面字符串容器
-    let content = '';
-
-    // 开启一个phantomjs子进程
-    let phantom = child_process.spawn('phantomjs', [__dirname + '/spider.js', url]);
-
-    // 设置stdout字符编码
-    phantom.stdout.setEncoding('utf8');
-
-    // 监听phantomjs的stdout，并拼接起来
-    phantom.stdout.on('data', function(data){
-        content += data.toString();
-    });
-
-    // 监听子进程退出事件
-    phantom.on('exit', function(code){
-        switch (code){
-            case 1:
-                console.log('加载失败');
-                res.send('加载失败');
-                break;
-            case 2:
-                console.log('加载超时: '+ url);
-                res.send(content);
-                break;
-            default:
-                res.send(content);
-                break;
-        }
-    });
-
+        // 完整URL
+        var url = req.protocol + '://'+ req.hostname + req.originalUrl;
+        console.log('---seo start:'+url);
+        // var url='http://www.kbjbuy.com'
+    
+        // 预渲染后的页面字符串容器
+        var content = '';
+    
+        let driver = await new Builder().forBrowser('chrome').
+        setChromeOptions(new chrome.Options().
+        addArguments("--headless").
+        addArguments("disable-infobars").
+        addArguments("--disable-extensions").
+        addArguments("--disable-gpu").
+        addArguments("--disable-dev-shm-usage").
+        addArguments("--no-sandbox").
+        addArguments("start-maximized")).build();
+      try {
+        await driver.get(url);
+        content = await driver.getPageSource();
+      } finally {
+        await driver.quit();
+        res.send(content);
+      }
 });
 
 app.set('port', port);
