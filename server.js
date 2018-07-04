@@ -35,6 +35,8 @@ app.get('/*', function(req, res){
         addArguments("--no-sandbox").
         addArguments("start-maximized")).build();
       try {
+        let capabilities = await driver.getCapabilities();
+        capabilities['map_'].set('timeouts', { implicit: 4000 });
         await driver.get(url);
         content = await driver.getPageSource();
       } finally {
